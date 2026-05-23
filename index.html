@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#1c0d03">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>RIFASAL1000 🐴 — Elige tu número</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --gold: #C9973A; --gold-l: #E8C068; --gold-d: #7A5518;
+  --brown: #1c0d03; --brown2: #2d1608; --brown3: #3d1f0a;
+  --cream: #F9F0DC; --red: #8b1a1a; --green: #1b5e20;
+  --wa: #075e54; --wa2: #25d366;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{font-size:16px;}
+body{background:#0d0600;font-family:'Crimson Text',Georgia,serif;min-height:100vh;color:#f5edd8;overscroll-behavior:none;}
+input,button{font-family:inherit;outline:none;}
+input::placeholder{color:rgba(201,151,58,0.3);}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px;}
+.bb{font-family:'Bebas Neue',sans-serif;}
+
+/* ─ Overlay ─ */
+#overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:50;
+  align-items:center;justify-content:center;padding:16px;overflow-y:auto;}
+#overlay.show{display:flex;}
+
+/* ─ Modal base ─ */
+.modal{background:var(--brown);border:2px solid var(--gold);border-radius:18px;
+  padding:24px;width:100%;max-width:390px;box-shadow:0 0 80px rgba(201,151,58,0.2);
+  animation:popIn .25s ease;position:relative;}
+@keyframes popIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.modal-title{font-size:28px;color:var(--gold-l);letter-spacing:4px;line-height:1;}
+.modal-sub{font-size:10px;color:rgba(201,151,58,.5);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.modal-close{position:absolute;top:16px;right:18px;background:none;border:none;
+  color:rgba(201,151,58,.5);font-size:22px;cursor:pointer;padding:4px;}
+
+/* ─ Inputs ─ */
+.inp-wrap{margin-bottom:10px;}
+.inp-lbl{font-size:10px;color:rgba(201,151,58,.6);letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;display:block;}
+.inp{width:100%;background:#2a1205;border:1px solid rgba(201,151,58,.25);border-radius:8px;
+  padding:9px 12px;color:#f5edd8;font-size:15px;}
+.inp:focus{border-color:var(--gold);}
+.inp-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+/* ─ Botones ─ */
+.btn{width:100%;padding:13px;border-radius:12px;border:none;cursor:pointer;
+  font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;transition:opacity .15s;}
+.btn:active{opacity:.8;}
+.btn-wa{background:linear-gradient(135deg,var(--wa),#128c7e);color:#fff;box-shadow:0 4px 20px rgba(7,94,84,.35);}
+.btn-green{background:linear-gradient(135deg,var(--green),#2e7d32);color:#fff;box-shadow:0 4px 20px rgba(27,94,32,.35);}
+.btn-red{background:var(--red);color:#ff7d7d;}
+.btn-amber{background:#7a5518;color:#ffd97d;}
+.btn-outline{background:none;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.35);font-size:13px;padding:10px;}
+.btn-row{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;}
+.btn-row .btn{flex:1;min-width:100px;}
+
+/* ─ Chips ─ */
+.chip{background:rgba(201,151,58,.12);border:1px solid rgba(201,151,58,.25);border-radius:20px;
+  padding:3px 10px;font-size:11px;color:var(--gold-l);}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+
+/* ─ Estatus pill ─ */
+.pill-row{display:flex;gap:8px;margin-top:4px;}
+.pill{flex:1;padding:8px;border-radius:8px;border:2px solid;cursor:pointer;font-family:'Bebas Neue',sans-serif;
+  font-size:12px;letter-spacing:1px;text-align:center;background:none;transition:all .15s;}
+
+/* ─ Error ─ */
+.error-msg{color:#ff7d7d;font-size:12px;margin-top:4px;}
+
+/* ─ Header ─ */
+#header{background:linear-gradient(160deg,var(--brown) 0%,var(--brown2) 100%);
+  border-bottom:3px solid var(--gold);padding:14px 16px 12px;position:sticky;top:0;z-index:10;}
+.h-brand{font-size:26px;color:var(--gold-l);letter-spacing:5px;line-height:1;}
+.h-tag{font-size:10px;color:rgba(201,151,58,.45);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px;}
+.stat-card{background:rgba(0,0,0,.3);border-radius:8px;padding:8px 4px;text-align:center;}
+.stat-val{font-size:18px;letter-spacing:1px;line-height:1;}
+.stat-lbl{font-size:8px;color:rgba(255,255,255,.3);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+.prog-bar{background:rgba(255,255,255,.06);border-radius:50px;height:7px;overflow:hidden;margin-top:10px;}
+.prog-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--red),var(--gold),var(--gold-l));transition:width .6s ease;}
+.prog-txt{display:flex;justify-content:space-between;margin-top:3px;font-size:9px;color:rgba(201,151,58,.3);letter-spacing:1px;}
+
+/* ─ Admin row ─ */
+.admin-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:10px;}
+.admin-inp{width:100px;background:rgba(0,0,0,.3);border:1px solid rgba(201,151,58,.2);border-radius:7px;
+  padding:6px 10px;color:#f5edd8;font-size:13px;}
+.admin-btn{background:var(--brown3);border:1px solid var(--gold);border-radius:7px;padding:6px 12px;
+  color:var(--gold-l);font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1px;cursor:pointer;}
+.admin-badge{font-size:10px;color:#7dff7d;letter-spacing:2px;background:rgba(27,94,32,.3);
+  padding:4px 10px;border-radius:20px;border:1px solid rgba(76,175,80,.25);}
+
+/* ─ Banner aviso ─ */
+#aviso{margin:10px 14px 0;background:linear-gradient(135deg,rgba(7,94,84,.15),rgba(18,140,126,.1));
+  border:1px solid rgba(37,211,102,.2);border-radius:12px;padding:10px 14px;
+  display:flex;align-items:center;gap:10px;}
+.aviso-ico{font-size:22px;flex-shrink:0;}
+.aviso-title{font-family:'Bebas Neue',sans-serif;font-size:13px;color:#25d366;letter-spacing:2px;}
+.aviso-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:1px;}
+
+/* ─ Filtros ─ */
+#filtros{margin:10px 14px 0;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.filt-inp{flex:1;min-width:150px;background:rgba(255,255,255,.05);border:1px solid rgba(201,151,58,.18);
+  border-radius:10px;padding:7px 12px;color:#f5edd8;font-size:13px;}
+.filt-btn{padding:6px 12px;border-radius:20px;border:1.5px solid;cursor:pointer;
+  font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:1.5px;background:none;transition:all .15s;}
+
+/* ─ Grid de números ─ */
+#grid-wrap{padding:10px 14px 30px;}
+.grid-info{font-size:10px;color:rgba(255,255,255,.25);letter-spacing:1px;margin-bottom:8px;}
+#numeros-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:5px;}
+.num{border-radius:8px;padding:7px 3px;text-align:center;cursor:pointer;transition:transform .12s;
+  border:1.5px solid;position:relative;user-select:none;}
+.num:active{transform:scale(.92);}
+.num.disponible{background:#1a3d1a;border-color:#3a8a3a;}
+.num.vendido{background:#3d0a0a;border-color:#c0392b;opacity:.45;cursor:default;}
+.num.apartado{background:#3d2a05;border-color:#c9973a;opacity:.7;cursor:default;}
+.num-n{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;line-height:1;}
+.num.disponible .num-n{color:#7dff7d;}
+.num.vendido .num-n{color:#ff7d7d;}
+.num.apartado .num-n{color:#ffd97d;}
+.num-s{font-size:7px;text-transform:uppercase;letter-spacing:.5px;margin-top:1px;}
+.num.disponible .num-s{color:#3a8a3a;}
+.num.vendido .num-s{color:#c0392b;}
+.num.apartado .num-s{color:#c9973a;}
+.num-paid{position:absolute;top:1px;right:2px;font-size:7px;}
+
+/* ─ Leyenda ─ */
+#leyenda{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;padding:4px 14px 10px;}
+.ley-item{display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,.3);}
+.ley-dot{width:11px;height:11px;border-radius:3px;border:1px solid;}
+
+/* ─ Loading ─ */
+#loader{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;gap:14px;}
+.spinner{width:36px;height:36px;border:3px solid rgba(201,151,58,.2);border-top-color:var(--gold);
+  border-radius:50%;animation:spin 1s linear infinite;}
+
+/* ─ Toast ─ */
+#toast{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  border-radius:10px;padding:10px 20px;font-size:13px;letter-spacing:1px;z-index:200;
+  white-space:nowrap;box-shadow:0 6px 28px rgba(0,0,0,.5);animation:fadeUp .3s ease;}
+#toast.show{display:block;}
+
+/* ─ Paso indicador ─ */
+.pasos{display:flex;gap:6px;justify-content:center;margin-bottom:16px;}
+.paso-dot{width:8px;height:8px;border-radius:50%;background:rgba(201,151,58,.2);transition:background .3s;}
+.paso-dot.active{background:var(--gold);}
+
+@media(max-width:360px){
+  .stats-grid{grid-template-columns:repeat(2,1fr);}
+  .stat-val{font-size:16px;}
+  #numeros-grid{grid-template-columns:repeat(auto-fill,minmax(52px,1fr));}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOADER ══ -->
+<div id="loader">
+  <div style="font-size:52px">🐴</div>
+  <div class="spinner"></div>
+  <div class="bb" style="color:var(--gold);font-size:20px;letter-spacing:5px">RIFASAL1000</div>
+</div>
+
+<!-- ══ APP (oculto hasta cargar) ══ -->
+<div id="app" style="display:none">
+
+  <!-- Header -->
+  <div id="header">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+      <div>
+        <div class="bb h-brand">🐴 RIFASAL1000</div>
+        <div class="h-tag">Elige tu número · $250 MXN · Gana a Kabul</div>
+      </div>
+      <!-- Admin area -->
+      <div class="admin-row" id="admin-area">
+        <input type="password" id="pin-inp" class="admin-inp" placeholder="PIN admin" maxlength="6">
+        <button class="admin-btn" onclick="verificarPin()">ADMIN</button>
+        <span id="pin-err" style="font-size:10px;color:#ff7d7d;display:none">PIN incorrecto</span>
+        <span id="admin-badge" class="admin-badge bb" style="display:none">🔐 ADMIN</span>
+        <button id="salir-btn" onclick="salirAdmin()" style="display:none;background:none;border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:4px 8px;color:rgba(255,255,255,.3);font-size:11px;cursor:pointer">Salir</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="bb stat-val" id="s-dis" style="color:#7dff7d">-</div><div class="stat-lbl">Disponibles</div></div>
+      <div class="stat-card"><div class="bb stat-val" id="s-apt" style="color:#ffd97d">-</div><div class="stat-lbl">Apartados</div></div>
+      <div class="stat-card"><div class="bb stat-val" id="s-ven" style="color:#ff7d7d">-</div><div class="stat-lbl">Vendidos</div></div>
+      <div class="stat-card"><div class="bb stat-val" id="s-rec" style="color:var(--gold-l)">-</div><div class="stat-lbl">Recaudado</div></div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="prog-txt"><span>000</span><span id="prog-txt">0% vendido</span><span>999</span></div>
+  </div>
+
+  <!-- Aviso público -->
+  <div id="aviso">
+    <span class="aviso-ico">💬</span>
+    <div>
+      <div class="aviso-title">¡ELIGE TU NÚMERO Y TE LLEVAMOS A WHATSAPP!</div>
+      <div class="aviso-sub">Toca un número verde · llena tus datos · te contactamos para confirmar</div>
+    </div>
+  </div>
+
+  <!-- Filtros -->
+  <div id="filtros">
+    <input class="filt-inp" id="buscar" placeholder="🔍 Buscar número o nombre..." oninput="renderGrid()">
+    <button class="filt-btn" data-f="todos"      onclick="setFiltro('todos')"      style="border-color:var(--gold);color:var(--gold-l);background:rgba(201,151,58,.12)">TODOS</button>
+    <button class="filt-btn" data-f="disponible" onclick="setFiltro('disponible')" style="border-color:rgba(255,255,255,.08);color:rgba(255,255,255,.3)">DISPONIBLES</button>
+    <button class="filt-btn" data-f="vendido"    onclick="setFiltro('vendido')"    style="border-color:rgba(255,255,255,.08);color:rgba(255,255,255,.3)">VENDIDOS</button>
+  </div>
+
+  <!-- Grid -->
+  <div id="grid-wrap">
+    <div class="grid-info" id="grid-info">Cargando números...</div>
+    <div id="numeros-grid"></div>
+  </div>
+
+  <!-- Leyenda -->
+  <div id="leyenda">
+    <div class="ley-item"><div class="ley-dot" style="background:#1a3d1a;border-color:#3a8a3a"></div>Disponible</div>
+    <div class="ley-item"><div class="ley-dot" style="background:#3d2a05;border-color:#c9973a"></div>Apartado</div>
+    <div class="ley-item"><div class="ley-dot" style="background:#3d0a0a;border-color:#c0392b"></div>Vendido</div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ══ OVERLAY / MODALES ══ -->
+<div id="overlay" onclick="cerrarOverlay(event)">
+  <div id="modal-contenido" class="modal" onclick="event.stopPropagation()"></div>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div id="toast"></div>
+
+<!-- ══ FIREBASE ══ -->
+<script type="module">
+import { initializeApp }       from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, remove }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+// ── CONFIGURACIÓN FIREBASE ──────────────────────────────────
+// ⚠️  REEMPLAZA ESTOS VALORES con los de tu proyecto Firebase
+// Guía: https://console.firebase.google.com → Crear proyecto → Realtime Database
+const firebaseConfig = {
+  apiKey:            "TU_API_KEY",
+  authDomain:        "TU_PROYECTO.firebaseapp.com",
+  databaseURL:       "https://TU_PROYECTO-default-rtdb.firebaseio.com",
+  projectId:         "TU_PROYECTO",
+  storageBucket:     "TU_PROYECTO.appspot.com",
+  messagingSenderId: "TU_SENDER_ID",
+  appId:             "TU_APP_ID"
+};
+// ────────────────────────────────────────────────────────────
+
+const WA = "527291662353";
+const ADMIN_PIN = "1000";
+const TOTAL = 1000;
+const pad = n => String(n).padStart(3,"0");
+
+let boletos = {};
+let isAdmin = false;
+let filtroActivo = "todos";
+
+// Firebase
+let db, boletosRef;
+try {
+  const app = initializeApp(firebaseConfig);
+  db = getDatabase(app);
+  boletosRef = ref(db, "rifasal1000/boletos");
+
+  // Escuchar cambios en tiempo real
+  onValue(boletosRef, snap => {
+    boletos = snap.val() || {};
+    renderStats();
+    renderGrid();
+  });
+
+  document.getElementById("loader").style.display = "none";
+  document.getElementById("app").style.display = "block";
+} catch(e) {
+  // Modo sin Firebase (demo local)
+  console.warn("Firebase no configurado — modo demo local");
+  boletos = {};
+  document.getElementById("loader").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("aviso").innerHTML += `
+    <div style="margin-top:6px;font-size:10px;color:#ffd97d;letter-spacing:1px">
+      ⚠️ Configura Firebase para que los datos sean compartidos en tiempo real
+    </div>`;
+  renderStats(); renderGrid();
+}
+
+// ── GUARDAR BOLETO ──────────────────────────────────────────
+async function guardarBoleto(num, datos) {
+  boletos[num] = datos;
+  if (db) {
+    try { await set(ref(db, `rifasal1000/boletos/${num}`), datos); } catch(e) {}
+  }
+}
+
+async function liberarBoleto(num) {
+  delete boletos[num];
+  if (db) {
+    try { await remove(ref(db, `rifasal1000/boletos/${num}`)); } catch(e) {}
+  }
+}
+
+// ── STATS ───────────────────────────────────────────────────
+function renderStats() {
+  const vals = Object.values(boletos);
+  const ven = vals.filter(b=>b.e==="v").length;
+  const apt = vals.filter(b=>b.e==="a").length;
+  const rec = vals.filter(b=>b.e==="v"&&b.p).length * 250;
+  const dis = TOTAL - ven - apt;
+  document.getElementById("s-dis").textContent = dis;
+  document.getElementById("s-apt").textContent = apt;
+  document.getElementById("s-ven").textContent = ven;
+  document.getElementById("s-rec").textContent = "$"+rec.toLocaleString();
+  document.getElementById("prog-fill").style.width = ((ven/TOTAL)*100)+"%";
+  document.getElementById("prog-txt").textContent = ((ven/TOTAL)*100).toFixed(1)+"% vendido";
+}
+
+// ── GRID ────────────────────────────────────────────────────
+window.renderGrid = function() {
+  const q = (document.getElementById("buscar")?.value||"").toLowerCase();
+  const grid = document.getElementById("numeros-grid");
+  const nums = Array.from({length:TOTAL},(_,i)=>i).filter(n=>{
+    const b = boletos[n];
+    const est = b?.e==="v"?"vendido": b?.e==="a"?"apartado":"disponible";
+    if (filtroActivo!=="todos" && est!==filtroActivo) return false;
+    if (q) return pad(n).includes(q)||(b?.nom||"").toLowerCase().includes(q);
+    return true;
+  });
+  document.getElementById("grid-info").textContent = `${nums.length} números`;
+  grid.innerHTML = nums.map(n=>{
+    const b = boletos[n];
+    const est = b?.e==="v"?"vendido": b?.e==="a"?"apartado":"disponible";
+    const click = (est==="disponible"||isAdmin) ? `onclick="abrirNumero(${n})"` : "";
+    const paid = b?.p ? `<span class="num-paid">✅</span>` : "";
+    const sub = est==="disponible"?"libre": est==="vendido"?"✕":"…";
+    return `<div class="num ${est}" ${click} title="${b?.nom||""}">${paid}
+      <div class="num-n">${pad(n)}</div>
+      <div class="num-s">${sub}</div>
+    </div>`;
+  }).join("");
+};
+
+// ── FILTRO ──────────────────────────────────────────────────
+window.setFiltro = function(f) {
+  filtroActivo = f;
+  document.querySelectorAll(".filt-btn").forEach(btn=>{
+    const active = btn.dataset.f === f;
+    btn.style.borderColor  = active ? "var(--gold)" : "rgba(255,255,255,.08)";
+    btn.style.color        = active ? "var(--gold-l)" : "rgba(255,255,255,.3)";
+    btn.style.background   = active ? "rgba(201,151,58,.12)" : "none";
+  });
+  renderGrid();
+};
+
+// ── ADMIN ───────────────────────────────────────────────────
+window.verificarPin = function() {
+  const v = document.getElementById("pin-inp").value;
+  if (v === ADMIN_PIN) {
+    isAdmin = true;
+    document.getElementById("pin-inp").style.display = "none";
+    document.querySelector(".admin-btn").style.display = "none";
+    document.getElementById("pin-err").style.display = "none";
+    document.getElementById("admin-badge").style.display = "inline";
+    document.getElementById("salir-btn").style.display = "inline";
+    document.getElementById("aviso").style.display = "none";
+    renderGrid();
+    toast("🔐 Modo administrador activo","#1b5e20","#4caf50");
+  } else {
+    document.getElementById("pin-err").style.display = "inline";
+    document.getElementById("pin-inp").value = "";
+    setTimeout(()=>document.getElementById("pin-err").style.display="none",2000);
+  }
+};
+document.getElementById("pin-inp").addEventListener("keydown",e=>{ if(e.key==="Enter") window.verificarPin(); });
+
+window.salirAdmin = function() {
+  isAdmin = false;
+  document.getElementById("pin-inp").style.display = "";
+  document.querySelector(".admin-btn").style.display = "";
+  document.getElementById("admin-badge").style.display = "none";
+  document.getElementById("salir-btn").style.display = "none";
+  document.getElementById("aviso").style.display = "";
+  renderGrid();
+};
+
+// ── ABRIR NÚMERO ────────────────────────────────────────────
+window.abrirNumero = function(n) {
+  const b = boletos[n];
+  const est = b?.e==="v"?"vendido": b?.e==="a"?"apartado":"disponible";
+  if (isAdmin) mostrarModalAdmin(n, b, est);
+  else mostrarModalCliente(n);
+};
+
+// ── MODAL CLIENTE — 3 pasos ──────────────────────────────────
+window.mostrarModalCliente = function(n) {
+  let paso = 1;
+  const render = () => {
+    document.getElementById("modal-contenido").innerHTML = modalClienteHTML(n, paso);
+  };
+  render();
+  document.getElementById("overlay").classList.add("show");
+  window._setPasoCliente = (p) => { paso=p; render(); };
+  window._enviarWA = () => {
+    const nom = document.getElementById("ci-nom")?.value.trim()||"";
+    const tel = document.getElementById("ci-tel")?.value.trim()||"";
+    const est = document.getElementById("ci-est")?.value.trim()||"";
+    const mun = document.getElementById("ci-mun")?.value.trim()||"";
+    if (!nom){ document.getElementById("ci-err").textContent="Escribe tu nombre completo.";return; }
+    if (!tel){ document.getElementById("ci-err").textContent="Escribe tu teléfono o WhatsApp.";return; }
+    const msg = encodeURIComponent(
+`🐴✨ *RIFASAL1000* ✨🐴
+*¡Hola! Quiero apartar el boleto:*
+
+🎟️ *Boleto N°:* ${pad(n)}
+👤 *Nombre:* ${nom}
+📱 *Teléfono:* ${tel}${est?`\n🗺️ *Estado:* ${est}`:""}${mun?`\n📍 *Municipio:* ${mun}`:""}
+
+💵 *Precio:* $250 MXN
+━━━━━━━━━━━━━━━━━━
+🐎 Potro Perlino Cremeyo *"Kabul"*
+Raza Ibero · 3 años · Rienda y baile 🎶`);
+    paso=3; render();
+    setTimeout(()=>window.open(`https://wa.me/${WA}?text=${msg}`,"_blank"),350);
+  };
+  window._reabrirWA = () => {
+    const msg=encodeURIComponent(`🐴 Hola, quiero el boleto #${pad(n)} de RIFASAL1000 · $250 MXN`);
+    window.open(`https://wa.me/${WA}?text=${msg}`,"_blank");
+  };
+};
+
+function modalClienteHTML(n, paso) {
+  const pasos = `<div class="pasos">
+    ${[1,2,3].map(p=>`<div class="paso-dot ${paso>=p?"active":""}"></div>`).join("")}
+  </div>`;
+  if (paso===1) return `
+    <button class="modal-close" onclick="cerrarModal()">✕</button>
+    ${pasos}
+    <div class="bb modal-title">BOLETO #${pad(n)}</div>
+    <div class="modal-sub">¡Número disponible!</div>
+    <div style="background:#2a1205;border-radius:12px;padding:16px;margin:16px 0;text-align:center;">
+      <div style="font-size:44px;margin-bottom:6px;">🐴</div>
+      <div class="bb" style="font-size:17px;color:var(--gold-l);letter-spacing:3px">Potro Perlino Cremeyo</div>
+      <div style="font-style:italic;font-size:20px;color:#fff;margin-top:2px">"Kabul"</div>
+      <div class="chips" style="justify-content:center;margin-top:8px;">
+        <span class="chip">🐎 Raza Ibero</span><span class="chip">3 años</span>
+        <span class="chip">Rienda y baile</span><span class="chip">🎶 Parrandero</span>
+      </div>
+      <div style="margin-top:12px;border-top:1px solid rgba(201,151,58,.15);padding-top:10px;">
+        <div class="bb" style="font-size:26px;color:#ff7d7d;letter-spacing:2px">$250 MXN</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.3);margin-top:2px">por boleto · pago único</div>
+      </div>
+    </div>
+    <button class="btn btn-green" onclick="_setPasoCliente(2)">✅ QUIERO ESTE NÚMERO</button>
+    <button class="btn btn-outline" style="margin-top:8px" onclick="cerrarModal()">Ver otros números</button>`;
+
+  if (paso===2) return `
+    <button class="modal-close" onclick="cerrarModal()">✕</button>
+    ${pasos}
+    <div class="bb modal-title">TUS DATOS</div>
+    <div class="modal-sub">Boleto #${pad(n)} · $250 MXN</div>
+    <div style="margin-top:16px;display:flex;flex-direction:column;gap:2px;">
+      <div class="inp-wrap"><label class="inp-lbl">👤 Nombre completo *</label>
+        <input id="ci-nom" class="inp" type="text" placeholder="Juan Pérez García" autocomplete="name"></div>
+      <div class="inp-wrap"><label class="inp-lbl">📱 WhatsApp / Teléfono *</label>
+        <input id="ci-tel" class="inp" type="tel" placeholder="729 123 4567" autocomplete="tel"></div>
+      <div class="inp-row">
+        <div class="inp-wrap"><label class="inp-lbl">🗺️ Estado</label>
+          <input id="ci-est" class="inp" type="text" placeholder="Edo. de México"></div>
+        <div class="inp-wrap"><label class="inp-lbl">📍 Municipio</label>
+          <input id="ci-mun" class="inp" type="text" placeholder="Toluca"></div>
+      </div>
+      <div id="ci-err" class="error-msg"></div>
+    </div>
+    <button class="btn btn-wa" style="margin-top:12px" onclick="_enviarWA()">💬 CONTINUAR EN WHATSAPP</button>
+    <button class="btn btn-outline" style="margin-top:8px" onclick="_setPasoCliente(1)">← Regresar</button>`;
+
+  return `
+    <button class="modal-close" onclick="cerrarModal()">✕</button>
+    ${pasos}
+    <div style="text-align:center;padding:8px 0;">
+      <div style="font-size:56px;margin-bottom:10px;">🎉</div>
+      <div class="bb" style="font-size:22px;color:#7dff7d;letter-spacing:4px;margin-bottom:8px">¡ABRIENDO WHATSAPP!</div>
+      <div style="font-size:13px;color:rgba(245,237,216,.6);line-height:1.7;margin-bottom:18px">
+        Se abrió WhatsApp con tu mensaje listo.<br>
+        Solo <strong style="color:var(--gold-l)">envíalo</strong> para reservar el boleto
+        <strong style="color:var(--gold-l)">#${pad(n)}</strong>.
+      </div>
+      <button class="btn btn-wa" onclick="_reabrirWA()">💬 ABRIR WHATSAPP DE NUEVO</button>
+      <button class="btn btn-outline" style="margin-top:8px" onclick="cerrarModal()">Cerrar</button>
+    </div>`;
+}
+
+// ── MODAL ADMIN ──────────────────────────────────────────────
+window.mostrarModalAdmin = function(n, b, est) {
+  document.getElementById("modal-contenido").innerHTML = `
+    <button class="modal-close" onclick="cerrarModal()">✕</button>
+    <div class="bb modal-title">ADMIN · #${pad(n)}</div>
+    <div class="modal-sub">${est==="disponible"?"Registrar manualmente":"Estado: "+est.toUpperCase()}</div>
+    <div style="margin-top:16px;display:flex;flex-direction:column;gap:2px;">
+      <div class="inp-wrap"><label class="inp-lbl">👤 Nombre</label>
+        <input id="a-nom" class="inp" value="${b?.nom||""}" placeholder="Juan Pérez García"></div>
+      <div class="inp-wrap"><label class="inp-lbl">📱 Teléfono</label>
+        <input id="a-tel" class="inp" value="${b?.tel||""}" placeholder="729 123 4567"></div>
+      <div class="inp-row">
+        <div class="inp-wrap"><label class="inp-lbl">🗺️ Estado</label>
+          <input id="a-est" class="inp" value="${b?.est||""}" placeholder="Edo. México"></div>
+        <div class="inp-wrap"><label class="inp-lbl">📍 Municipio</label>
+          <input id="a-mun" class="inp" value="${b?.mun||""}" placeholder="Toluca"></div>
+      </div>
+      <div class="pill-row">
+        <button id="pill-p" class="pill" onclick="setPagado(true)"
+          style="border-color:${b?.p?"#2e7d32":"rgba(76,175,80,.2)"};color:${b?.p?"#fff":"#4caf50"};background:${b?.p?"#1b5e20":"none"}">✅ PAGADO</button>
+        <button id="pill-nd" class="pill" onclick="setPagado(false)"
+          style="border-color:${!b?.p?"#f9a825":"rgba(249,168,37,.2)"};color:${!b?.p?"#fff":"#ffc107"};background:${!b?.p?"#e65100":"none"}">⏳ PENDIENTE</button>
+      </div>
+    </div>
+    <div class="btn-row">
+      ${est==="disponible" ? `
+        <button class="btn btn-red" onclick="adminVender(${n},'v')">🎟️ VENDIDO</button>
+        <button class="btn btn-amber" onclick="adminVender(${n},'a')">⏸️ APARTAR</button>
+      ` : `
+        <button class="btn btn-red" onclick="adminVender(${n},'${b?.e||"v"}')">✅ GUARDAR</button>
+        <button class="btn" style="background:#1a3d1a;color:#7dff7d" onclick="adminLiberar(${n})">🔓 LIBERAR</button>
+      `}
+    </div>`;
+  document.getElementById("overlay").classList.add("show");
+  window._pagadoVal = b?.p || false;
+};
+
+window.setPagado = function(v) {
+  window._pagadoVal = v;
+  document.getElementById("pill-p").style.background  = v?"#1b5e20":"none";
+  document.getElementById("pill-p").style.borderColor = v?"#2e7d32":"rgba(76,175,80,.2)";
+  document.getElementById("pill-p").style.color       = v?"#fff":"#4caf50";
+  document.getElementById("pill-nd").style.background  = !v?"#e65100":"none";
+  document.getElementById("pill-nd").style.borderColor = !v?"#f9a825":"rgba(249,168,37,.2)";
+  document.getElementById("pill-nd").style.color       = !v?"#fff":"#ffc107";
+};
+
+window.adminVender = async function(n, e) {
+  const datos = {
+    e, nom: document.getElementById("a-nom").value.trim(),
+    tel: document.getElementById("a-tel").value.trim(),
+    est: document.getElementById("a-est").value.trim(),
+    mun: document.getElementById("a-mun").value.trim(),
+    p: window._pagadoVal,
+    f: new Date().toLocaleDateString("es-MX")
+  };
+  await guardarBoleto(n, datos);
+  cerrarModal();
+  const lbl = e==="v"?"vendido":"apartado";
+  toast(`✅ Boleto #${pad(n)} → ${lbl}`,"#1b5e20","#4caf50");
+};
+
+window.adminLiberar = async function(n) {
+  await liberarBoleto(n);
+  cerrarModal();
+  toast(`🔓 Boleto #${pad(n)} liberado`,"#3d2a05","var(--gold)");
+};
+
+// ── UTILIDADES ───────────────────────────────────────────────
+window.cerrarOverlay = function(e) { if(e.target.id==="overlay") cerrarModal(); };
+window.cerrarModal = function() {
+  document.getElementById("overlay").classList.remove("show");
+  setTimeout(()=>document.getElementById("modal-contenido").innerHTML="",300);
+};
+
+window.toast = function(msg, bg="#1b5e20", border="#4caf50") {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.style.background = bg;
+  t.style.border = `1px solid ${border}`;
+  t.style.color = "#fff";
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2800);
+};
+</script>
+
+</body>
+</html>
